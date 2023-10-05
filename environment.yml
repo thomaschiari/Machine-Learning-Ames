@@ -48,3 +48,5 @@ dependencies:
       - autograd==1.6.2
       - dvc
       - dvclive
+      - lightgbm
+      - xgboost
