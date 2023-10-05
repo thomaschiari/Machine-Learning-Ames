@@ -22,3 +22,5 @@ openpyxl==3.1.2
 autograd==1.6.2
 dvc
 dvclive
+lightgbm
+xgboost
