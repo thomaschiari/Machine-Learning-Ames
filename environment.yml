@@ -50,3 +50,4 @@ dependencies:
       - dvclive
       - lightgbm
       - xgboost
+      - catboost

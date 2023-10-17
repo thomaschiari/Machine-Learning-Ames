@@ -24,3 +24,4 @@ dvc
 dvclive
 lightgbm
 xgboost
+catboost
