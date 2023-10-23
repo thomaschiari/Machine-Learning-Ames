@@ -11,7 +11,7 @@ Este é um projeto de regressão utilizando o dataset [Ames](https://www.openint
 ### Análise e Modelagem
 Foi feito uma análise e um pré-processamento nos dados do dataset, afim de alcançar uma acurácia maior nas previsões. Vários testes foram feitos nos dados, alterações, análises, etc., e tudo pode ser encontrado em /notebooks/preprocessing.ipynb.
 
-Sobre os testes de modelo e comparações, podem ser encontrados em /notebooks/modelling.ipynb.
+Sobre os testes de modelo e comparações, podem ser encontrados em /notebooks/modelling.ipynb. Lá, também é possível encontrar nossas conclusões, algumas explicações sobre os modelos escolhidos para a API e análise de importância de features em alguns modelos.
 
 ### API
 Uma API simples foi desenvolvida com FastAPI, e pode ser encontrada em /API. Mais instruções na seção "Como Usar".
@@ -64,7 +64,7 @@ Com `model_name` sendo:
 - `ridge` para Regressão Linear com regularização Ridge;
 - `both` para ambos os modelos, com uma média entre as previsões.
 
-A API recebe um corpo em formato JSON que representa uma linha do dataframe Ames, e utiliza nosso melhor modelo treinado para retornar uma previsão.
+A API recebe um corpo em formato JSON que representa uma linha do dataframe Ames, e utiliza nosso melhor modelo treinado para retornar uma previsão. Dentro do notebook [`preprocessing`](./notebooks/preprocessing.ipynb), a última célula seleciona uma linha aleatória do dataset, e a transforma em um JSON, que pode ser utilizado para testar a API.
 
 **OBSERVAÇÃO**: Está API não é robusta o suficiente para tratar erros. A intenção de seu desenvolvimento é permitir que o usuário inpute dados no modelo apresentado no Ames e receba uma previsão rápida do target. Para utilizá-la de forma correta, faça questão de acessar a documentação do dataset, e enviar os dados para a API de forma condizente.
 
