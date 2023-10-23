@@ -22,7 +22,9 @@ df = pd.read_parquet(f'{pathlib.Path.cwd().parent}/fetch_data/data_final.parquet
 X = df.drop(['SalePrice'], axis=1)
 y = df['SalePrice']
 
-cat = CatBoostRegressor(random_state=42, verbose=0, iterations=20000, learning_rate=0.025)
+X = X.reindex(sorted(X.columns), axis=1)
+
+cat = CatBoostRegressor(random_state=42, verbose=0, iterations=20000, learning_rate=0.004094)
 cat.fit(X, y)
 
 cat.save_model('catboost_model.cbm')

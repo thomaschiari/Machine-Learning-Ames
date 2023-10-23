@@ -1,9 +1,8 @@
 import pandas as pd
 import numpy as np
-from sklearn.neighbors import KNeighborsRegressor
 from scipy import stats
-from sklearn.preprocessing import RobustScaler
-from category_encoders import OrdinalEncoder
+import pathlib
+import joblib
 
 def remap_objects(series, old_categories, new_category):
     if not pd.api.types.is_categorical_dtype(series):
@@ -117,6 +116,7 @@ def sc_preprocessing(item: dict):
 
         df_nan = df.isna().sum().to_frame('nan_count')
 
+
         df_nan['type'] = df.dtypes
 
         df_nan.sort_values(by='nan_count', ascending=False, inplace=True)
@@ -125,17 +125,6 @@ def sc_preprocessing(item: dict):
 
         df_num = df.select_dtypes(include=np.number)
         df_cat = df.select_dtypes(exclude=np.number)
-
-        # for col in cols_nan:
-        #     impute = df_num[df_num[col].isna()]
-        #     imputer_train = df_num[~df_num[col].isna()]
-            
-        #     # Certifique-se de que cols_nonan esteja presente em ambos os DataFrames
-        #     cols_nonan = [col for col in cols_nonan if col in df_num.columns]
-            
-        #     imputer = KNeighborsRegressor(n_neighbors=5)
-        #     knr = imputer.fit(imputer_train[cols_nonan], imputer_train[col])
-        #     df_num.loc[impute.index, col] = knr.predict(impute[cols_nonan])
 
         df = pd.concat([df_num, df_cat], axis=1)
 
@@ -297,16 +286,43 @@ def sc_preprocessing(item: dict):
 
         df = pd.concat([df_num, df_cat], axis=1)
 
-        scaler = RobustScaler()
-        df[num_fts] = scaler.fit_transform(df[num_fts])
+        print('Scaling numerical variables')
+        try:
+            scaler = joblib.load(pathlib.Path.cwd().parent / 'models' / 'scaler.pkl')
+            df[num_fts] = scaler.transform(df[num_fts])
+        except Exception as e:
+            print(f'Error scaling: {e}')
 
         ordinal_variables = [col for col in ordinal_variables if col in df.columns]
+        ordencoder = joblib.load(pathlib.Path.cwd().parent / 'models' / 'ordencoder.pkl')
+        print('Encoding ordinal variables')
+        try:
+            transformed_data = ordencoder.transform(df[ordinal_variables])
+            df_ord = pd.DataFrame(transformed_data, columns=ordencoder.get_feature_names())
+        except Exception as e:
+            print(f'Error encoding: {e}')
+            df_ord = pd.DataFrame(np.zeros((df.shape[0], 1)), columns=['ord'])
+        df.drop(columns=ordinal_variables, inplace=True)
+        df = pd.concat([df, df_ord], axis=1)
 
-        ordencoder = OrdinalEncoder(cols=ordinal_variables)
-        df = ordencoder.fit_transform(df)
-        print("Cheguei aqui")
+        print(df.shape)
 
-        df = pd.get_dummies(df, drop_first=True)
+        categorical_variables = df.select_dtypes(exclude=np.number).columns.tolist()
+        print(len(categorical_variables))
+        catencoder = joblib.load(pathlib.Path.cwd().parent / 'models' / 'catencoder.pkl')
+        print('Encoding categorical variables')
+        try:
+            transformed_data = catencoder.transform(df[categorical_variables])
+            df_cat = pd.DataFrame(transformed_data, columns=catencoder.get_feature_names())
+        except Exception as e:
+            print(f'Error encoding: {e}')
+            df_cat = pd.DataFrame(np.zeros((df.shape[0], 1)), columns=['cat'])
+        df.drop(columns=categorical_variables, inplace=True)
+        df = pd.concat([df, df_cat], axis=1)
+
+        print(df.shape)
+
+        df = df.reindex(sorted(df.columns), axis=1)
 
         return df
     except:

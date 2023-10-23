@@ -55,6 +55,105 @@ Assim que o comando for executado, a API será inicializada, e pode ser acessada
 
 Utilize um programa para testar a API, como o Postman por exemplo.
 
+Para realizar a previsão, realize um POST request utilizando o URL:
+    
+    http://localhost:8000/predict/{model_name}
+    
+Com `model_name` sendo:
+- `catboost` para CatBoost Regression;
+- `ridge` para Regressão Linear com regularização Ridge;
+- `both` para ambos os modelos, com uma média entre as previsões.
+
 A API recebe um corpo em formato JSON que representa uma linha do dataframe Ames, e utiliza nosso melhor modelo treinado para retornar uma previsão.
 
 **OBSERVAÇÃO**: Está API não é robusta o suficiente para tratar erros. A intenção de seu desenvolvimento é permitir que o usuário inpute dados no modelo apresentado no Ames e receba uma previsão rápida do target. Para utilizá-la de forma correta, faça questão de acessar a documentação do dataset, e enviar os dados para a API de forma condizente.
+
+Exemplo de inserção de dados:
+
+```json
+
+{
+    "Order": 2640,
+    "PID": 902104020,
+    "MS.SubClass": 50,
+    "MS.Zoning": "RM",
+    "Lot.Frontage": 60.0,
+    "Lot.Area": 9600,
+    "Street": "Pave",
+    "Alley": "Grvl",
+    "Lot.Shape": "Reg",
+    "Land.Contour": "Lvl",
+    "Utilities": "AllPub",
+    "Lot.Config": "Inside",
+    "Land.Slope": "Gtl",
+    "Neighborhood": "OldTown",
+    "Condition.1": "Norm",
+    "Condition.2": "Norm",
+    "Bldg.Type": "1Fam",
+    "House.Style": "1.5Fin",
+    "Overall.Qual": 6,
+    "Overall.Cond": 8,
+    "Year.Built": 1900,
+    "Year.Remod.Add": 2004,
+    "Roof.Style": "Gable",
+    "Roof.Matl": "CompShg",
+    "Exterior.1st": "Wd Sdng",
+    "Exterior.2nd": "Wd Sdng",
+    "Mas.Vnr.Type": null,
+    "Mas.Vnr.Area": 0.0,
+    "Exter.Qual": "TA",
+    "Exter.Cond": "TA",
+    "Foundation": "BrkTil",
+    "Bsmt.Qual": "TA",
+    "Bsmt.Cond": "TA",
+    "Bsmt.Exposure": "No",
+    "BsmtFin.Type.1": "Rec",
+    "BsmtFin.SF.1": 381.0,
+    "BsmtFin.Type.2": "Unf",
+    "BsmtFin.SF.2": 0.0,
+    "Bsmt.Unf.SF": 399.0,
+    "Total.Bsmt.SF": 780.0,
+    "Heating": "GasA",
+    "Heating.QC": "Ex",
+    "Central.Air": "Y",
+    "Electrical": "SBrkr",
+    "X1st.Flr.SF": 940,
+    "X2nd.Flr.SF": 476,
+    "Low.Qual.Fin.SF": 0,
+    "Gr.Liv.Area": 1416,
+    "Bsmt.Full.Bath": 0.0,
+    "Bsmt.Half.Bath": 1.0,
+    "Full.Bath": 1,
+    "Half.Bath": 0,
+    "Bedroom.AbvGr": 3,
+    "Kitchen.AbvGr": 1,
+    "Kitchen.Qual": "Gd",
+    "TotRms.AbvGrd": 7,
+    "Functional": "Typ",
+    "Fireplaces": 0,
+    "Fireplace.Qu": null,
+    "Garage.Type": "Detchd",
+    "Garage.Yr.Blt": 1956.0,
+    "Garage.Finish": "Unf",
+    "Garage.Cars": 2.0,
+    "Garage.Area": 400.0,
+    "Garage.Qual": "TA",
+    "Garage.Cond": "TA",
+    "Paved.Drive": "Y",
+    "Wood.Deck.SF": 0,
+    "Open.Porch.SF": 24,
+    "Enclosed.Porch": 0,
+    "X3Ssn.Porch": 0,
+    "Screen.Porch": 0,
+    "Pool.Area": 0,
+    "Pool.QC": null,
+    "Fence": null,
+    "Misc.Feature": null,
+    "Misc.Val": 0,
+    "Mo.Sold": 6,
+    "Yr.Sold": 2006,
+    "Sale.Type": "WD ",
+    "Sale.Condition": "Normal"
+}
+
+```

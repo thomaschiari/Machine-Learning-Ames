@@ -27,41 +27,50 @@ from catboost import CatBoostRegressor
 
 app = FastAPI()
 
-@app.post("/predict/{predict_type}")
-async def create_item(predict_type: str, item: dict):
-    if predict_type == "catboost":
+@app.post("/predict/{model_name}")
+async def create_item(model_name: str, item: dict):
 
+    if model_name == "catboost":
         model = CatBoostRegressor()
         model.load_model(f"{pathlib.Path.cwd().parent}/models/catboost_model.cbm")
         item = sc_preprocessing(item)
         try:
             prediction = model.predict(item)
-            return  {"prediction": prediction}.toJSON()
-        except:
-            return {"prediction": "Erro na predição"}
-        
-    elif predict_type == "linear":
-
+            return  {"prediction log10": prediction[0],
+                        "final prediction": 10**prediction[0],
+                        "feature_importance": dict(zip(model.feature_names_, model.get_feature_importance()))}
+        except Exception as e:
+            return {"prediction": "Erro na predição: " + str(e)}
+    
+    elif model_name == "ridge":
         model = joblib.load(f"{pathlib.Path.cwd().parent}/models/linear_model.pkl")
         item = sc_preprocessing(item)
         try:
             prediction = model.predict(item)
-            return  {"prediction": prediction}.toJSON()
-        except:
-            return {"prediction": "Erro na predição"}
+            return  {"prediction log10": prediction[0],
+                        "final prediction": 10**prediction[0]}
+        except Exception as e:
+            return {"prediction": "Erro na predição: " + str(e)}
     
-    elif predict_type == "both":
+    elif model_name == "both":
+        cat_model = CatBoostRegressor()
+        cat_model.load_model(f"{pathlib.Path.cwd().parent}/models/catboost_model.cbm")
 
-        model_catboost = CatBoostRegressor()
-        model_catboost.load_model(f"{pathlib.Path.cwd().parent}/models/catboost_model.cbm")
-        model_linear = joblib.load(f"{pathlib.Path.cwd().parent}/models/linear_model.pkl")
+        ridge_model = joblib.load(f"{pathlib.Path.cwd().parent}/models/linear_model.pkl")
+
         item = sc_preprocessing(item)
+
         try:
-            prediction_catboost = model_catboost.predict(item)
-            prediction_linear = model_linear.predict(item)
-            return {"catboost": prediction_catboost, "linear": prediction_linear}.toJSON()
-        except:
-            return {"prediction": "Erro na predição"}
+            prediction_cat = cat_model.predict(item)
+            prediction_ridge = ridge_model.predict(item)
+            return  {"prediction catboost log10": prediction_cat[0],
+                     "prediction ridge log10": prediction_ridge[0],
+                     "prediction catboost": 10**prediction_cat[0],
+                     "prediction ridge": 10**prediction_ridge[0],
+                     "prediction log10": (prediction_cat[0] + prediction_ridge[0])/2,
+                     "final prediction": 10**((prediction_cat[0] + prediction_ridge[0])/2)}
+        except Exception as e:
+            return {"prediction": "Erro na predição: " + str(e)}
     
     else:
-        raise HTTPException(status_code=404, detail="Invalid predict type")
+        raise HTTPException(status_code=404, detail="Modelo não encontrado.")
